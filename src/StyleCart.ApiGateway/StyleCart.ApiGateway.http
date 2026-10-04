@@ -1,0 +1,6 @@
+@StyleCart.ApiGateway_HostAddress = http://localhost:5150
+
+GET {{StyleCart.ApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

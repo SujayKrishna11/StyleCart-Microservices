@@ -1,0 +1,41 @@
+trigger:
+  branches:
+    include:
+      - main
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+  solution: StyleCart.Microservices.sln
+
+steps:
+  - task: UseDotNet@2
+    displayName: Use .NET 10 SDK
+    inputs:
+      packageType: sdk
+      version: 10.x
+
+  - script: dotnet restore $(solution)
+    displayName: Restore dependencies
+
+  - script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
+    displayName: Build microservices
+
+  - script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build
+    displayName: Run tests
+
+  - script: |
+      dotnet publish src/StyleCart.UserService/StyleCart.UserService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/user-service
+      dotnet publish src/StyleCart.ProductService/StyleCart.ProductService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/product-service
+      dotnet publish src/StyleCart.OrderService/StyleCart.OrderService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/order-service
+      dotnet publish src/StyleCart.ApiGateway/StyleCart.ApiGateway.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api-gateway
+    displayName: Publish services
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish service artifacts
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: stylecart-microservices

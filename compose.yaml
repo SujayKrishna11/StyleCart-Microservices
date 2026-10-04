@@ -1,0 +1,124 @@
+name: stylecart-microservices
+
+services:
+  user-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stylecart_users
+      POSTGRES_USER: stylecart
+      POSTGRES_PASSWORD: stylecart_dev_password
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stylecart -d stylecart_users"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  product-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stylecart_products
+      POSTGRES_USER: stylecart
+      POSTGRES_PASSWORD: stylecart_dev_password
+    volumes:
+      - product-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stylecart -d stylecart_products"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  order-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stylecart_orders
+      POSTGRES_USER: stylecart
+      POSTGRES_PASSWORD: stylecart_dev_password
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stylecart -d stylecart_orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user-service:
+    image: stylecart-microservices-user-service:latest
+    build:
+      context: .
+      dockerfile: src/StyleCart.UserService/Containerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__UserDatabase: Host=user-db;Port=5432;Database=stylecart_users;Username=stylecart;Password=stylecart_dev_password
+      Jwt__Key: StyleCartMicroservicesDevelopmentKey_ChangeBeforeProduction_2026
+      Jwt__Issuer: StyleCart.UserService
+      Jwt__Audience: StyleCart.Client
+    ports:
+      - "5207:8080"
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+  product-service:
+    image: stylecart-microservices-product-service:latest
+    build:
+      context: .
+      dockerfile: src/StyleCart.ProductService/Containerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ProductDatabase: Host=product-db;Port=5432;Database=stylecart_products;Username=stylecart;Password=stylecart_dev_password
+      Jwt__Key: StyleCartMicroservicesDevelopmentKey_ChangeBeforeProduction_2026
+      Jwt__Issuer: StyleCart.UserService
+      Jwt__Audience: StyleCart.Client
+    ports:
+      - "5250:8080"
+    depends_on:
+      product-db:
+        condition: service_healthy
+
+  order-service:
+    image: stylecart-microservices-order-service:latest
+    build:
+      context: .
+      dockerfile: src/StyleCart.OrderService/Containerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__OrderDatabase: Host=order-db;Port=5432;Database=stylecart_orders;Username=stylecart;Password=stylecart_dev_password
+      ProductService__BaseUrl: http://product-service:8080
+      Jwt__Key: StyleCartMicroservicesDevelopmentKey_ChangeBeforeProduction_2026
+      Jwt__Issuer: StyleCart.UserService
+      Jwt__Audience: StyleCart.Client
+    ports:
+      - "5260:8080"
+    depends_on:
+      order-db:
+        condition: service_healthy
+      product-service:
+        condition: service_started
+
+  api-gateway:
+    image: stylecart-microservices-api-gateway:latest
+    build:
+      context: .
+      dockerfile: src/StyleCart.ApiGateway/Containerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      RUNNING_IN_CONTAINER: "true"
+      Jwt__Key: StyleCartMicroservicesDevelopmentKey_ChangeBeforeProduction_2026
+      Jwt__Issuer: StyleCart.UserService
+      Jwt__Audience: StyleCart.Client
+    ports:
+      - "5270:8080"
+    depends_on:
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+
+volumes:
+  user-db-data:
+  product-db-data:
+  order-db-data:
