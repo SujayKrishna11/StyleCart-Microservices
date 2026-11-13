@@ -19,6 +19,21 @@ podman ps
 
 The API gateway is available at `http://localhost:5270`.
 
+## Customer web app
+
+The React customer UI is in `stylecart-web`. During development, run it through
+Vite after starting the microservices:
+
+```powershell
+cd stylecart-web
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. The Vite proxy routes browser calls through the
+API gateway. The same UI can be packaged with Podman using its `Containerfile`;
+the `stylecart-web` service exposes port `5173` when run from `compose.yaml`.
+
 ## Security
 
 Do not commit Azure Foundry keys, connection strings, or `.env` files. Configure production secrets through environment variables or a secret manager.

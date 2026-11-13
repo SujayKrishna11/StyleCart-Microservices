@@ -27,11 +27,23 @@ steps:
   - script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build
     displayName: Run tests
 
+  - task: NodeTool@0
+    displayName: Use Node.js 22
+    inputs:
+      versionSpec: 22.x
+
+  - script: |
+      cd stylecart-web
+      npm ci
+      npm run build
+    displayName: Build customer web app
+
   - script: |
       dotnet publish src/StyleCart.UserService/StyleCart.UserService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/user-service
       dotnet publish src/StyleCart.ProductService/StyleCart.ProductService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/product-service
       dotnet publish src/StyleCart.OrderService/StyleCart.OrderService.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/order-service
       dotnet publish src/StyleCart.ApiGateway/StyleCart.ApiGateway.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api-gateway
+      cp -R stylecart-web/dist $(Build.ArtifactStagingDirectory)/stylecart-web
     displayName: Publish services
 
   - task: PublishBuildArtifacts@1

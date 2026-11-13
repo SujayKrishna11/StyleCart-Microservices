@@ -118,6 +118,17 @@ services:
       order-service:
         condition: service_started
 
+  stylecart-web:
+    image: stylecart-microservices-web:latest
+    build:
+      context: ./stylecart-web
+      dockerfile: Containerfile
+    ports:
+      - "5173:8080"
+    depends_on:
+      api-gateway:
+        condition: service_started
+
 volumes:
   user-db-data:
   product-db-data:
