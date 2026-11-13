@@ -92,6 +92,18 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "GatewayJwt"
       }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/recommendations/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/recommendations/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "order-service",
+          "Port": 8080
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {

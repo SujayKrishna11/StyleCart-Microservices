@@ -44,13 +44,20 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 await app.UseOcelot();
 
 app.Run();
