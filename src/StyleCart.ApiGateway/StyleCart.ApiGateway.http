@@ -1,6 +1,28 @@
-@StyleCart.ApiGateway_HostAddress = http://localhost:5150
+@gatewayUrl = http://localhost:5270
 
-GET {{StyleCart.ApiGateway_HostAddress}}/weatherforecast/
+### Search products through the API Gateway
+GET {{gatewayUrl}}/gateway/products?search=shirt
 Accept: application/json
 
 ###
+
+### Ask the local FAQ fallback chatbot
+POST {{gatewayUrl}}/api/support/chat
+Content-Type: application/json
+
+{
+  "message": "How can I check my order status?"
+}
+
+###
+
+### Get cross-customer recommendations for the signed-in user
+# Replace {{token}} with a JWT returned by /gateway/auth/login.
+GET {{gatewayUrl}}/gateway/recommendations/for-you
+Authorization: Bearer {{token}}
+
+###
+
+### Get products frequently purchased with a variant
+GET {{gatewayUrl}}/gateway/recommendations/variants/1/also-bought
+Accept: application/json

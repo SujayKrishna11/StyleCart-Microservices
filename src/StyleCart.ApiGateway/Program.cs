@@ -44,13 +44,30 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseWhen(
+    context => context.Request.Path.StartsWithSegments("/api/support"),
+    supportApi =>
+    {
+        supportApi.UseRouting();
+        supportApi.UseAuthentication();
+        supportApi.UseAuthorization();
+        supportApi.UseEndpoints(endpoints => endpoints.MapControllers());
+    });
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 await app.UseOcelot();
 
 app.Run();

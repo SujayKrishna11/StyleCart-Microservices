@@ -19,13 +19,37 @@ public sealed class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ProductResponse>>> GetAll()
+    public async Task<ActionResult<IReadOnlyList<ProductResponse>>> GetAll(
+        [FromQuery] string? search)
     {
-        var products = await _dbContext.Products
+        if (!string.IsNullOrWhiteSpace(search) && search.Trim().Length < 2)
+        {
+            return BadRequest(new
+            {
+                message = "Enter at least 2 characters to search products."
+            });
+        }
+
+        var query = _dbContext.Products
             .AsNoTracking()
             .Include(product => product.Variants)
             .ThenInclude(variant => variant.Inventory)
-            .Where(product => product.IsActive)
+            .Where(product => product.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchPattern = $"%{search.Trim()}%";
+
+            // Search the customer-facing fields in one database query.
+            query = query.Where(product =>
+                EF.Functions.ILike(product.Name, searchPattern) ||
+                (product.Brand != null &&
+                 EF.Functions.ILike(product.Brand, searchPattern)) ||
+                (product.Description != null &&
+                 EF.Functions.ILike(product.Description, searchPattern)));
+        }
+
+        var products = await query
             .OrderBy(product => product.Name)
             .ToListAsync();
 
