@@ -77,6 +77,10 @@ public sealed class ProductsController : ControllerBase
             Name = request.Name.Trim(),
             Description = request.Description?.Trim(),
             Brand = request.Brand?.Trim(),
+            Category = string.IsNullOrWhiteSpace(request.Category)
+                ? "Men"
+                : request.Category.Trim(),
+            ImageUrl = request.ImageUrl?.Trim(),
             BasePrice = request.BasePrice
         };
 
@@ -180,6 +184,8 @@ public sealed class ProductsController : ControllerBase
             Name = product.Name,
             Description = product.Description,
             Brand = product.Brand,
+            Category = product.Category,
+            ImageUrl = product.ImageUrl,
             BasePrice = product.BasePrice,
             IsActive = product.IsActive,
             IsInStock = product.Variants.Any(variant =>

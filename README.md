@@ -34,6 +34,32 @@ Open `http://localhost:5173`. The Vite proxy routes browser calls through the
 API gateway. The same UI can be packaged with Podman using its `Containerfile`;
 the `stylecart-web` service exposes port `5173` when run from `compose.yaml`.
 
+The customer journey includes product search, customer registration and login,
+variant selection, cart quantity management, checkout, order history, and the
+local support FAQ. Checkout uses the current Order Service mock-payment flow;
+it is not a real payment-provider integration.
+
+## Verification
+
+```powershell
+dotnet test StyleCart.Microservices.sln --no-restore
+cd stylecart-web
+npm run build
+```
+
+The current automated suite contains API Gateway controller tests. Add service-
+level and end-to-end tests before treating this as production-ready.
+
+## Deliberately deferred
+
+- Microsoft Foundry agent, RAG knowledge base, safety configuration, and
+  telemetry need an Azure subscription and the appropriate organization roles.
+- A dedicated Payment Service and real payment-provider integration are not
+  implemented; checkout currently records a mock payment outcome in the Order
+  Service.
+- Kubernetes manifests and deployment are deferred by the team decision to use
+  Podman rather than Docker/Kubernetes in the available environment.
+
 ## Security
 
 Do not commit Azure Foundry keys, connection strings, or `.env` files. Configure production secrets through environment variables or a secret manager.

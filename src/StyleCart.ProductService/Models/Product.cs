@@ -10,6 +10,10 @@ public sealed class Product
 
     public string? Brand { get; set; }
 
+    public string Category { get; set; } = "Men";
+
+    public string? ImageUrl { get; set; }
+
     public decimal BasePrice { get; set; }
 
     public bool IsActive { get; set; } = true;

@@ -22,6 +22,15 @@ public sealed class ProductDbContext : DbContext
             .Property(product => product.BasePrice)
             .HasPrecision(18, 2);
 
+        builder.Entity<Product>()
+            .Property(product => product.Category)
+            .HasMaxLength(100)
+            .HasDefaultValue("Men");
+
+        builder.Entity<Product>()
+            .Property(product => product.ImageUrl)
+            .HasMaxLength(2000);
+
         builder.Entity<ProductVariant>()
             .Property(variant => variant.Price)
             .HasPrecision(18, 2);

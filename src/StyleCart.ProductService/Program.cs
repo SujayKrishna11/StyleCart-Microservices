@@ -67,6 +67,11 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
+    await dbContext.Database.ExecuteSqlRawAsync(
+        "ALTER TABLE \"Products\" ADD COLUMN IF NOT EXISTS \"Category\" character varying(100) NOT NULL DEFAULT 'Men';");
+    await dbContext.Database.ExecuteSqlRawAsync(
+        "ALTER TABLE \"Products\" ADD COLUMN IF NOT EXISTS \"ImageUrl\" character varying(2000);");
+    await CatalogSeedData.InitializeAsync(dbContext);
 }
 
 app.UseSwaggerUI();

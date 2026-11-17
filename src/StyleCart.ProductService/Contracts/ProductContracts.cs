@@ -14,6 +14,13 @@ public sealed class CreateProductRequest
     [StringLength(100)]
     public string? Brand { get; set; }
 
+    [StringLength(100)]
+    public string Category { get; set; } = "Men";
+
+    [Url]
+    [StringLength(2000)]
+    public string? ImageUrl { get; set; }
+
     [Range(0.01, 999999)]
     public decimal BasePrice { get; set; }
 }
@@ -60,6 +67,10 @@ public sealed class ProductResponse
     public string? Description { get; init; }
 
     public string? Brand { get; init; }
+
+    public string Category { get; init; } = string.Empty;
+
+    public string? ImageUrl { get; init; }
 
     public decimal BasePrice { get; init; }
 
